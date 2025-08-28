@@ -1,0 +1,276 @@
+:root{
+  --bg: #0a0f12;
+  --card: #0f151a;
+  --muted: #8aa3ad;
+  --text: #e6f3f7;
+  --accent: #00ffd5;
+  --accent-2: #6e8bff;
+  --border: rgba(255,255,255,0.08);
+  --ring: rgba(0,255,213,0.3);
+  --shadow: 0 10px 30px rgba(0,0,0,0.45);
+  --radius: 16px;
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; width: 100%; }
+html, body { overflow-x: clip; }
+@supports not (overflow-x: clip) { html, body { overflow-x: hidden; } }
+
+body{
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 16px/1.6 "Plus Jakarta Sans", system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+  -webkit-text-size-adjust: 100%;
+}
+
+.app, #hero, #results, .topbar, .tree-wrap, .credits { max-width: 100%; }
+img, svg { max-width: 100%; height: auto; }
+
+/* Background */
+/* Animated gradient background (smooth, vivid, cross-fading + light noise) */
+.bg-layer{
+  position: fixed; inset: 0;
+  /* simple dark fallback under JS-painted layers */
+  background: linear-gradient(120deg, #0a0f12 0%, #0b0f14 100%);
+  transition: opacity 1.6s ease, filter 1.6s ease;
+  opacity: 0.95;
+  pointer-events: none;
+  will-change: background, opacity, filter;
+}
+
+/* very subtle noise to break up banding (light touch so colors stay vivid) */
+.bg-layer::after{
+  content:"";
+  position:absolute; inset:0;
+  background-image:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAABT0lEQVR4nO2YvUoDQRBFz2nYyMoL2QhhY2Mjo5AEJQkYwU1IuRzIYCGnYA2VrY7sF7sFe5Ht4v7n1h6HRj0PHWntAkktIuHwxj88XMC7fQdcg7Iu5FSNhybPkmKc7I1b2gy1O4HL7SM9XBlf7t4Duz7Tf9cM3c5dwAkNldF3cc17qO1psCBSPYbwvQd97wQm6DlDk8y9BDcSbtUbhSy6Vf1WbFojZAl5xV9h8/hcM6HZja3MTKsdGpAOcBgJD1Tj1ZMN9jJQzuqStusfD6CPoQ31GBgpdPfSEgJ1FjYzqFBSHmrqM1awh2dDgFsvos3v7VGtZVq2s6F9CGeNnYifLrHZbD64nJZuvF0eySPoT4pV+HyM9k1I47OwvTpnMjhA3l6f03oRcmc9PCEhvkEIv/gISQ23UahcHkOe68+xHzR/9ADnaDP1y1yGegAAAABJRU5ErkJggg==");
+  opacity: 0.06;                /* lighter than before so colors pop */
+  mix-blend-mode: overlay;
+  pointer-events: none;
+}
+#bgB{ opacity: 0; }
+
+
+/* GitHub badge */
+.gh-badge{
+  position: fixed;
+  top: max(14px, env(safe-area-inset-top));
+  right: max(14px, env(safe-area-inset-right));
+  display: grid; place-items: center;
+  width: 42px; height: 42px; border-radius: 12px;
+  background:
+    linear-gradient(var(--card), var(--card)) padding-box,
+    linear-gradient(135deg, rgba(0,255,213,0.6), rgba(110,139,255,0.6)) border-box;
+  border: 1px solid transparent;
+  box-shadow: 0 10px 26px rgba(0,0,0,0.35);
+  text-decoration: none;
+  z-index: 25;
+  transition: transform .08s ease, box-shadow .2s ease, filter .2s ease;
+}
+.gh-badge svg{ width: 22px; height: 22px; opacity: .9; }
+.gh-badge:hover{ filter: brightness(1.06); box-shadow: 0 12px 30px rgba(0,0,0,0.45), 0 0 18px rgba(0,255,213,0.12); }
+.gh-badge:active{ transform: translateY(1px) scale(0.99); }
+
+/* Loader */
+#loader{
+  position: fixed; inset: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 18px; padding: 24px; text-align: center;
+  background: rgba(5,8,10,0.6); backdrop-filter: blur(6px);
+  z-index: 30; opacity: 0; pointer-events: none; transition: opacity .3s ease;
+  min-height: 100svh; width: 100%;
+}
+#loader.active{ opacity: 1; pointer-events: auto; }
+.git-anim{ display: grid; place-items: center; width: 260px; height: 130px; border-radius: 20px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  border: 1px solid var(--border); box-shadow: var(--shadow); }
+.git-anim svg{ width: 220px; height: 110px; overflow: visible; }
+.git-anim .branch{ fill: none; stroke: var(--accent); stroke-width: 2.5; stroke-linecap: round;
+  stroke-dasharray: 6 10; animation: dashmove 1.2s linear infinite; filter: drop-shadow(0 0 6px rgba(0,255,213,0.35)); }
+.git-anim .node{ fill: #00121a; stroke: var(--accent); stroke-width: 2; }
+.git-anim .pulse{ fill: var(--accent-2); stroke: var(--accent-2); animation: pulser 1.4s ease-in-out infinite;
+  filter: drop-shadow(0 0 8px rgba(110,139,255,0.45)); }
+@keyframes dashmove{ to { stroke-dashoffset: -32; } }
+@keyframes pulser{ 0%,100%{transform:scale(1);opacity:.9} 50%{transform:scale(1.15);opacity:1} }
+.loader-text{ font-size: 14px; color: var(--muted); margin: 0; line-height: 1.4; max-width: 80ch; }
+#loader .spinner:not(.git-anim){ width: 0; height: 0; }
+
+/* App wrapper */
+.app{
+  position: relative;
+  min-height: 100svh; width: 100%;
+  display: grid;
+  grid-template-rows: 1fr auto;
+}
+
+/* Hero */
+#hero{
+  min-height: 100svh;
+  display: grid; place-content: center; gap: 26px;
+  padding: 24px clamp(12px, 4vw, 24px);
+  text-align: center; width: 100%;
+}
+.brand{ margin: 0; font-size: clamp(36px, 7vw, 56px); letter-spacing: -0.02em; font-weight: 800;
+  text-shadow: 0 6px 30px rgba(0,0,0,0.6); }
+.tagline{ margin: 0 auto; max-width: 720px; color: var(--muted); font-size: clamp(14px, 2.6vw, 18px); }
+.tagline .gh{ color: var(--accent); font-weight: 600; }
+
+/* Animated gradient text for the hero brand */
+.brand {
+  position: relative;
+  /* keep your existing font-size/weight etc. */
+  background: linear-gradient(90deg, var(--g1, #00ffd5), var(--g2, #6e8bff) 50%, var(--g3, #00ffd5) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;                 /* show the gradient instead of solid color */
+  background-size: 200% 100%;
+  animation: brandShift 8s ease-in-out infinite alternate;
+  /* subtle glow to retain presence on dark bg */
+  filter: drop-shadow(0 6px 30px rgba(0,0,0,0.6));
+}
+
+@keyframes brandShift {
+  0%   { background-position: 0% 50%; }
+  100% { background-position: 100% 50%; }
+}
+
+/* Search bar */
+.search{
+  margin: 6px auto 0; display: flex; gap: 10px; align-items: center; justify-content: center;
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  border: 1px solid var(--border); border-radius: 999px; padding: 10px;
+  width: 100%; max-width: 820px; box-shadow: var(--shadow); backdrop-filter: blur(8px);
+}
+.search input{
+  flex: 1; background: transparent; border: none; outline: none; color: var(--text);
+  padding: 14px 16px; font-size: 16px; min-width: 0;
+  font-family: "Plus Jakarta Sans", system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+}
+.search input::placeholder{ color: #7c95a0; }
+.search button{
+  display: inline-flex; align-items: center; gap: 10px; padding: 12px 18px; border-radius: 999px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: #00121a; font-weight: 700; border: 0; cursor: pointer;
+  transition: transform .06s ease, filter .2s ease; box-shadow: 0 10px 24px rgba(0, 255, 213, 0.23);
+  font-family: "Plus Jakarta Sans", "Inter", system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+  letter-spacing: -0.01em; white-space: nowrap;
+}
+.search button:hover{ filter: brightness(1.05); }
+.search button:active{ transform: translateY(1px) scale(0.99); }
+.hint{ color: var(--muted); font-size: 13px; margin-top: 10px;
+  font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; word-break: break-word; }
+
+/* Results (desktop defaults) */
+#results{
+  padding: clamp(14px, 3vw, 28px);
+  margin-inline: auto;
+  width: 100%; max-width: 1100px;
+  display: grid; gap: 16px;
+}
+.topbar{
+  display: flex; align-items: center; justify-content: space-between;
+  background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.015));
+  border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 12px 14px; box-shadow: var(--shadow); width: 100%; gap: 12px; flex-wrap: wrap;
+}
+.repo-breadcrumb{
+  display: flex; flex-wrap: wrap; gap: 8px; align-items: baseline; font-weight: 600;
+  min-width: 0; flex: 1 1 auto;
+}
+.repo-breadcrumb .name{ font-size: 18px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
+.repo-breadcrumb .branch{ font-size: 12px; color: var(--muted); padding: 2px 8px; border: 1px solid var(--border); border-radius: 999px; }
+.actions{ display: flex; gap: 8px; flex: 0 0 auto; min-width: 0; flex-wrap: wrap; justify-content: flex-end; }
+
+.ghost-btn{
+  font-weight: 700; cursor: pointer; border-radius: 12px; padding: 9px 14px;
+  transition: transform .06s ease, box-shadow .2s ease, filter .2s ease, background .2s ease;
+  will-change: transform, filter;
+}
+.ghost-btn.pretty{
+  background:
+    linear-gradient(var(--card), var(--card)) padding-box,
+    linear-gradient(135deg, rgba(0,255,213,0.7), rgba(110,139,255,0.7)) border-box;
+  border: 1px solid transparent; color: var(--text); box-shadow: 0 10px 26px rgba(0,0,0,0.35);
+  font-family: "Plus Jakarta Sans","Inter",system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial; letter-spacing:-0.01em;
+}
+.ghost-btn.pretty:hover{ filter: brightness(1.06); box-shadow: 0 12px 30px rgba(0,0,0,0.45), 0 0 22px rgba(0,255,213,0.15); }
+.ghost-btn.pretty:active{ transform: translateY(1px) scale(0.99); }
+
+/* Tree container */
+.tree-wrap{
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.015));
+  border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 10px 8px; box-shadow: var(--shadow);
+  overflow: hidden; width: 100%;
+}
+
+.tree{ font-size: 15px; }
+.tree ul{ list-style: none; margin: 0; padding: 0 0 0 22px; }
+.tree li{ position: relative; padding: 6px 8px; border-radius: 10px; }
+.tree li:hover{ background: rgba(255,255,255,0.03); }
+.node{ display: grid; grid-template-columns: 20px 1fr auto; gap: 10px; align-items: center; cursor: default; }
+.node .toggle{ display: inline-grid; place-items: center; width: 20px; height: 20px; border: 1px solid var(--border);
+  border-radius: 6px; cursor: pointer; transition: background .15s ease, border-color .15s ease, transform .06s ease; user-select: none; }
+.node .toggle:hover{ background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.12); }
+.node .toggle:active{ transform: translateY(1px) scale(0.98); }
+.icon{ display: inline-block; width: 18px; height: 18px; opacity: .9; }
+.name{ display: inline-flex; align-items: center; gap: 8px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.name span{ overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.meta{ color: var(--muted); font-size: 12px; }
+
+/* Toast */
+#toast{
+  position: fixed; left: 50%; transform: translateX(-50%);
+  bottom: max(24px, env(safe-area-inset-bottom));
+  background: rgba(5,8,10,0.85); border: 1px solid var(--border);
+  padding: 10px 14px; border-radius: 10px; color: var(--text);
+  box-shadow: var(--shadow); opacity: 0; pointer-events: none; transition: opacity .2s ease, transform .2s ease;
+  max-width: min(90vw, 680px);
+}
+#toast.show{ opacity: 1; pointer-events: auto; transform: translateX(-50%) translateY(-4px); }
+
+/* Credits */
+.credits{ text-align: center; color: var(--muted); padding: 16px 12px 24px; font-size: 12px; }
+
+/* ---------- MOBILE ONLY TUNING ---------- */
+@media (max-width: 680px){
+  /* Make results a 3-row grid so the tree can scroll inside without growing the page */
+  #results{
+    grid-template-rows: auto 1fr auto;
+    min-height: 100svh;
+    max-width: 100%;
+  }
+
+  .topbar{ padding: 10px 10px; gap: 10px; }
+  .actions{ width: 100%; justify-content: flex-start; gap: 6px; }
+  .ghost-btn{ padding: 8px 12px; font-size: 14px; }
+  .repo-breadcrumb .name{ font-size: 16px; }
+
+  /* The tree panel becomes a scroll container */
+  .tree-wrap{
+    padding: 6px;
+    overflow: auto;                /* allow internal scrolling */
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;  /* stop parent scroll chaining */
+    max-height: calc(100svh - 150px); /* fits below topbar; adjust if needed */
+    min-height: 0;                 /* allow shrinking inside the grid */
+  }
+
+  /* Performance & readability for deep trees */
+  .tree{ content-visibility: auto; contain: layout style; }
+  .tree ul{ border-left: 1px solid rgba(255,255,255,0.05); margin-left: 6px; padding-left: 10px; }
+  .tree li{ padding: 4px 4px; font-size: 14px; }
+  .tree ul ul li{ font-size: 13.5px; }
+  .tree ul ul ul li{ font-size: 13px; }
+
+  /* Simplify row layout; hide meta column */
+  .node{ grid-template-columns: 22px 1fr; }
+  .meta{ display: none; }
+
+  /* Extremely long filenames may wrap but won’t overflow */
+  .name, .name span{ white-space: normal; word-break: break-word; }
+
+  /* Hero padding & search width tighten a touch */
+  #hero{ padding: 20px 14px; }
+  .search{ width: 100%; }
+}
