@@ -2,9 +2,8 @@
 
 > A sleek, minimal, dark-themed **GitHub repository explorer** that lets you view the full folder & file structure of any public GitHub repo — directly in your browser.
 
-![RepoScope Demo](https://user-images.githubusercontent.com/00000000/placeholder-demo.gif)
 
----
+
 
 ## ✨ Features
 
