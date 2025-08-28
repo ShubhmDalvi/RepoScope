@@ -42,7 +42,7 @@ Feel free to open an [issue](https://github.com/shubhmdalvi/reposcope/issues) or
 
 ## 📜 License
 
-MIT License © 2025 [Your Name](https://github.com/shubhmdalvi)
+MIT License © 2025 [Shubham Dalvi](https://github.com/shubhmdalvi)
 
 ---
 
